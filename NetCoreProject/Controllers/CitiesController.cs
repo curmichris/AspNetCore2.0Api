@@ -4,30 +4,47 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NetCoreProject.Interfaces;
+using NetCoreProject.Model;
 
 namespace NetCoreProject.Controllers
 {
     [Route("/api/cities")]
     public class CitiesController : Controller
     {
-        [HttpGet]
-        public JsonResult GetCities()
+        private readonly ICityInfoRepository _cityInfoRepository;
+        public CitiesController(ICityInfoRepository cityInfoRepository)
         {
-            var temp = new JsonResult(new CitiesDataStore().Cities);
-            return temp;
+            _cityInfoRepository = cityInfoRepository;
+        }
+
+        [HttpGet]
+        public IActionResult GetCities()
+        {
+            var cityEntities = _cityInfoRepository.GetCities();
+            var results = cityEntities.Select(o => new CityWithoutPointsOfInterestDto()
+            {
+                Name = o.Name,
+                Description = o.Description,
+                Id = o.Id
+            });
+
+            return Ok(results);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetCity(int id)
         {
-            var cityToReturn = new CitiesDataStore().Cities.FirstOrDefault(x => x.Id == id);
-            if (cityToReturn == null)
+            var city = _cityInfoRepository.GetCity(id, false);
+
+            var result = new CityWithoutPointsOfInterestDto()
             {
-                return NotFound();
-            }
+                Name = city.Name,
+                Description = city.Description,
+                Id = city.Id
+            };
 
-            return Ok(cityToReturn);
-
+            return Ok(result);
         }
     }
 }

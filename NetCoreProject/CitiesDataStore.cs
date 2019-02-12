@@ -8,13 +8,13 @@ namespace NetCoreProject
 {
     public class CitiesDataStore
     {
-        public List<CityDto.CityDto> Cities { get; }
+        public List<CityDto> Cities { get; }
 
         public CitiesDataStore()
         {
-            this.Cities = new List<CityDto.CityDto>()
+            this.Cities = new List<CityDto>()
                 {
-                    new CityDto.CityDto()
+                    new CityDto()
                     {
                         Id = 1,
                         Name = "New York",
@@ -36,13 +36,13 @@ namespace NetCoreProject
                         }
 
                     },
-                    new CityDto.CityDto()
+                    new CityDto()
                     {
                         Id = 2,
                         Name = "Antwerp",
                         Description = "This one has a big cathedral."
                     },
-                    new CityDto.CityDto()
+                    new CityDto()
                     {
                         Id = 3,
                         Name = "Malta",
