@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite;
 using Microsoft.Extensions.Logging;
+using NetCoreProject.Interfaces;
 using NetCoreProject.Model;
+using NetCoreProject.Services;
 
 namespace NetCoreProject.Controllers
 {
@@ -13,10 +16,13 @@ namespace NetCoreProject.Controllers
     public class PointsOfInterestController : Controller
     {
         private readonly ILogger<PointsOfInterestController> _logger;
+        private readonly ILocalMailService _mailService;
 
-        public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+        public PointsOfInterestController(ILogger<PointsOfInterestController> logger,
+            ILocalMailService mailService)
         {
             _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpGet("{cityId}/pointsofinterest")]
@@ -135,6 +141,28 @@ namespace NetCoreProject.Controllers
 
             pointOfInterestFromStore.Name = poiToPatch.Name;
             pointOfInterestFromStore.Description = poiToPatch.Decription;
+
+            return NoContent();
+        }
+
+        [HttpDelete("{cityId}/pointofinterest/{id}")]
+        public IActionResult DeletePointOfInterest(int cityId, int id)
+        {
+            var city = new CitiesDataStore().Cities.FirstOrDefault(c => c.Id == cityId);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(c => c.Id == id);
+            if (pointOfInterestFromStore == null)
+            {
+                return NotFound();
+            }
+
+            city.PointsOfInterest.Remove(pointOfInterestFromStore);
+            _mailService.Send("Deleted", $"The POI city with id: {cityId} and POI Id {id} was deleted");
+
 
             return NoContent();
         }
